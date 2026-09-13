@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Taller de Git</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400,500,600,700,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Letra muy grande para máxima legibilidad sin esfuerzo visual */
+            font-size: 1.25rem;
+            /* 20px base */
+            line-height: 1.85;
+            word-break: normal;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        /* Scrollbar horizontal grueso y visible para bloques de código largos */
+        .thick-horizontal-scroll::-webkit-scrollbar {
+            height: 14px;
+            display: block;
+        }
+
+        .thick-horizontal-scroll::-webkit-scrollbar-track {
+            background: #020617;
+            border-radius: 7px;
+        }
+
+        .thick-horizontal-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 7px;
+            border: 3px solid #020617;
+        }
+
+        .thick-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Ocultar barra lateral en contenedores específicos */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Alerta de rotación obligatoria para dispositivos en horizontal */
+        #rotate-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #090d16;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 2.5rem;
+        }
+
+        @media screen and (orientation: landscape) and (max-height: 650px) {
+            #rotate-warning {
+                display: flex;
+            }
+        }
+
+        .lesson-scroll {
+            scroll-margin-top: 110px;
+        }
+    </style>
+</head>
+
+<body class="bg-[#090d16] text-slate-100 flex flex-col min-h-screen">
+
+    <div id="rotate-warning">
+        <svg class="w-20 h-20 text-blue-400 animate-bounce mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        </svg>
+        <h2 class="text-3xl font-bold mb-3 text-white">Gira tu celular a vertical</h2>
+        <p class="text-slate-300 text-lg max-w-xs leading-relaxed">Este taller está diseñado en formato vertical para
+            una lectura cómoda y sin zoom.</p>
+    </div>
+
+    <header
+        class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-4 flex justify-between items-center shadow-xl">
+        <div class="flex items-center space-x-3">
+            <button id="menu-toggle" onclick="toggleSidebar()"
+                class="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-100 transition border border-slate-700 shadow-md"
+                aria-label="Abrir Menú">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+            <div class="flex items-center space-x-2.5">
+                <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-900/40">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M2.6 10.59L13.41 0l2.12 2.12-9.9 9.9 9.9 9.9-2.12 2.12L2.6 13.41a1.5 1.5 0 010-2.82zM18 10h4v4h-4v-4z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold text-white leading-tight">Taller de Git</h1>
+                    <p class="text-sm text-blue-400 font-semibold">
+                        Aprende de forma sencilla
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div
+            class="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded-full text-sm font-bold shadow-inner whitespace-nowrap">
+            Docente: Darío Sossa
+        </div>
+    </header>
+
+    <div id="sidebar-backdrop" onclick="toggleSidebar()"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+    </div>
+    <aside id="sidebar"
+        class="fixed top-0 left-0 bottom-0 w-84 max-w-[85vw] bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/60">
+            <div class="flex items-center space-x-2.5">
+                <h2 class="text-base font-bold text-white tracking-wide">Índice del Taller</h2>
+            </div>
+            <button onclick="toggleSidebar()"
+                class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+        <div id="sidebar-nav-list" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
+            <!-- Menú dinámico inyectado por JavaScript -->
+        </div>
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-center">
+            <p class="text-sm text-slate-400">Toca cualquier unidad para saltar</p>
+        </div>
+    </aside>
+
+    <main class="flex-1 w-full max-w-xl mx-auto px-4 py-6 space-y-8">
+
+        <div
+            class="w-full h-60 rounded-3xl overflow-hidden relative shadow-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-800 flex items-center justify-center">
+            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&auto=format&fit=crop&q=80"
+                alt="Curso de Git en Windows Banner" class="w-full h-full object-cover opacity-65"
+                onerror="this.src='https://placehold.co/600x300/1e293b/38bdf8?text=Git+Windows+Masterclass'">
+            <div
+                class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent flex flex-col justify-end p-6">
+                <span
+                    class="text-sm bg-blue-500/25 text-blue-300 border border-blue-500/40 px-4 py-1.5 rounded-full w-max font-bold mb-2 shadow">Taller
+                    de Git</span>
+                <h2 class="text-2xl font-extrabold text-white leading-snug">Aprende Git de Forma Sencilla</h2>
+            </div>
+        </div>
+
+        <div id="lessons-container" class="space-y-8">
+            <!-- Inyectado dinámicamente mediante JavaScript -->
+        </div>
+
+    </main>
+
+    <div id="course-metadata" class="hidden">
+
+        <!-- 1 -->
+        <div class="lesson-item" data-id="1" data-title="¿Cómo instalar Git en Windows?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    1
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Qué es Git?
+                </h3>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUDgZsPBMh3avsxCiDXkKt1__BGSa7ynuYaDncRFHbPWdaW8i3Dpkb6AM&s=10"
+                    alt="Instalacion de Git en Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/f34f29/ffffff?text=Git'">
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Git es una <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">herramienta de
+                    control de versiones</strong>. <br>
+                Te permite guardar el historial de tu proyecto.
+            </p>
+
+            <!-- Ejemplo -->
+            <div class="space-y-6">
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Ejemplo:
+                        </span>
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            ¿Por qué usamos Git?
+                        </h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">
+                        Nuestro jefe puede pedirnos que cambiemos el color de una parte de una página web y, después de
+                        ver el resultado, decirnos que el color anterior era mejor. <br><br>
+                        Si utilizamos Git, <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">podemos
+                            volver a la versión anterior</strong> sin tener que recordar ni rehacer manualmente todos
+                        los cambios.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="lesson-item" data-id="2" data-title="Git vs GitHub">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    2
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">Git vs GitHub
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">Git:</strong>
+                sirve para guardar los cambios que hacemos en nuestro proyecto en local y poder volver a una versión
+                anterior si lo necesitamos.
+            </p>
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">GitHub:</strong>
+                sirve para guardar nuestro proyecto en Internet. Así podemos tener una copia en línea, compartirla y
+                trabajar con otras personas.
+            </p>
+            <hr>
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                <strong class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">Git guarda
+                    los cambios en nuestra computadora y GitHub nos permite subir ese trabajo a Internet.
+                </strong>
+            </p>
+
+        </div>
+
+        <!-- 3 -->
+        <div class="lesson-item" data-id="3" data-title="¿Cómo descargar Git?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    3
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo descargar Git?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Debes seguir los siguientes pasos:
+            </p>
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Entra a la página oficial de Git</h4>
+                    </div>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>https://git-scm.com/</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="https://git-scm.com/"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar enlace">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Install
+                                for Windows"</strong></h4>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"click
+                                here to download"</strong></h4>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 4 -->
+        <div class="lesson-item" data-id="4" data-title="¿Cómo instalar Git?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    4
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo instalar Git?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Debes seguir los siguientes pasos:
+            </p>
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Buscamos el Instalador en: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Descargas
+                            </strong></h4>
+                    </div>
+
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos click derecho en: <br>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Git-X.XX.X.X-64-bit.exe"</strong><br>
+                            Ejecutar como Administrador.
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Le damos en <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"SI"</strong>
+                            para dar los permisos.</h4>
+                    </div>
+                </div>
+                <!-- Paso 4 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            4</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Nos indica que leamos las condiciones
+                            <br> Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 5 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            5</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Nos indica donde se instalara <br>
+                            Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 6 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            6</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Desmarcamos Open Git GUI here <br>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Para no usar la ventana gráfica.</strong> <br><br> Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 7 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            7</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Nos indica dónde aparecerá Git. <br>
+                            Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 8 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            8</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Git nos pregunta qué programa queremos
+                            usar para editar texto. <br><br>
+                            Seleccionamos: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Use
+                                the Nano editor by default"</strong>. <br><br>
+
+                            Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 9 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            9</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Git nos pregunta qué <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">nombre</strong>
+                            tendrá la primera rama de nuestros proyectos. <br><br>
+                            Seleccionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Let
+                                Git decide"</strong>. <br><br>
+
+                            Presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Paso 10 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            10</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">De aquí en adelante dejamos la
+                            configuración por defectos y solo presionamos: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 11 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            11</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Luego en vez del botón <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Next"</strong>
+                            <br><br>
+                            Aparcera <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Install"</strong>
+                            y presionamos ahi.
+                        </h4>
+                    </div>
+                </div>
+                <!-- Paso 12 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            12</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Finalmente terminara la instalación al
+                            presionar el botón <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Finish"</strong>.
+                        </h4>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- 5 -->
+        <div class="lesson-item" data-id="5" data-title="¿Cómo saber qué versión de Git estamos usando?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    5
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo saber qué versión de Git
+                    estamos usando?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Debes seguir los siguientes pasos:
+            </p>
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos el botón: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Windows"</strong>
+                            en el teclado.</h4>
+                    </div>
+
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Escribimos <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Git
+                                Bash"</strong> y lo abrimos.</h4>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Con <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Control
+                                +"</strong> podemos hacer más grande la letra y con <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Control
+                                -"</strong> lo hacemos más pequeña la letra y con.</h4>
+                    </div>
+                </div>
+                <!-- Paso 4 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            4</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Escribimos en la consola:</h4>
+                    </div>
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git --version</code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    En el caso de querer copiar, selecciona y copia con clic derecho.
+                </div>
+                <!-- Paso 5 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            5</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Después de escribir presiona: <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Enter"</strong>.
+                        </h4>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <!-- 6 -->
+        <div class="lesson-item" data-id="6" data-title="Configuración de usuario Git">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    6
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">Configuración de usuario Git
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Debes seguir los siguientes pasos:
+            </p>
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos el botón: <br> <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Windows"</strong>
+                            en el teclado.</h4>
+                    </div>
+
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Escribimos <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Git
+                                Bash"</strong> y lo abrimos.</h4>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Escribimos en la consola nuestro nombre:
+                        </h4>
+                    </div>
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.name "Tu Nombre"</code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    En el caso de querer copiar, selecciona y copia con clic derecho.
+                </div>
+
+                <!-- Paso 4 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            4</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Escribimos en la consola nuestro correo:
+                        </h4>
+                    </div>
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.email "tucorreo@gmail.com" </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    En el caso de querer copiar, selecciona y copia con clic derecho.
+                </div>
+                <!-- Paso 5 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            5</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Comprobación de Datos</h4>
+                    </div>
+                    <br>
+                    Para comprobar tu nombre escribe:
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.name </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Para comprobar tu correo escribe:
+
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.email </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Si la computadora ya tenía otro usuario configurado, Git simplemente <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">reemplazará
+                        el nombre y correo anteriores por los tuyos</strong>.
+                    <br>
+                    Para comprobar toda la configuración escribe:
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --list </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Presiona <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Q"</strong>
+                    para salir, si por alguna razón no puedes salir.
+                    <br>
+                </div>
+                <!-- Paso 6 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            6</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Otra forma de modificar</h4>
+                    </div>
+                    <br>
+                    Escribe el siguiente comando:
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global -e </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Se abrirá la termina de nano.
+                    <br><br>
+                    <strong class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                        Para modificar la información:</strong><br><br> Usamos el teclado.
+                    <br><br>
+                    <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Para
+                        guardar los cambios:</strong><br><br> Presionamos:
+                    <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Control
+                        + O</strong> y después <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Enter</strong>.
+                    <br><br>
+                    Para salir.
+                    <br><br>
+                    Presionamos:
+                    <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Control
+                        + X</strong>
+                    <br><br>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 7 -->
+        <div class="lesson-item" data-id="7" data-title="¿Cómo crear nuestro primer repositorio con Git?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    7
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo crear nuestro primer
+                    repositorio con Git?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Debes seguir los siguientes pasos:
+            </p>
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Creamos una carpeta.</h4>
+                    </div>
+
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Entramos a la carpeta.</h4>
+                    </div>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">En un espacio vacío, presionamos
+                            <br><strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">clic
+                                derecho</strong>.
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Paso 4 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            4</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Presionamos: <br><strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Open
+                                Git Bash here</strong>.</h4>
+                    </div>
+                </div>
+
+                <!-- Paso 5 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            5</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Activamos para ver "Archivos Ocultos":
+                        </h4>
+                    </div>
+                    <br>
+                    Dentro de la carpeta
+                    <br><br>
+                    En la parte superior presionamos <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Vista</strong>.
+                    <br><br>
+                    Entramos a <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Agrupación
+                        Mostrar</strong>.
+                    <br><br>
+                    Marcamos <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">"Elementos
+                        ocultos"</strong>.
+                    <br><br>
+                    <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Esto
+                        permitirá ver la carpeta que genera GIT</strong>
+
+                </div>
+
+                <!-- Paso 6 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            6</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Inicializar repositorio GIT
+                        </h4>
+                    </div>
+                    <br>
+                    En la terminal escribimos:
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git init </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    El comando <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">git
+                        init</strong> permite <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">iniciar
+                        Git</strong> dentro de la carpeta de nuestro proyecto. <br><br>
+
+                    En ese momento nos mostrará un mensaje indicando que el repositorio fue creado correctamente.
+                    <br><br>
+
+                    Dentro de nuestra carpeta aparecerá una nueva carpeta oculta llamada: <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                        .git
+                    </strong>
+                </div>
+                <!-- Paso 7 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            7</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Crear un repositorio Git con una rama que
+                            tenga un nombre diferente a master</h4>
+                    </div>
+                    <br>
+                    Al usar <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">git
+                        init</strong>, Git puede crear la rama inicial con el nombre <strong
+                        class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">master</strong>.
+                    <br><br>
+                    Si queremos colocar otro nombre, escribimos:
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git init --initial-branch="nombre" </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Ejemplo:
+
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git init --initial-branch="principal" </code></pre>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Paso 8 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            8</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Modificar el nombre del repositorio Git
+                        </h4>
+                    </div>
+                    <br>
+                    Si ya creamos el repositorio y queremos cambiar el nombre de la rama actual, escribimos:
+                    <br>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git branch -m "nuevo-nombre" </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Ejemplo:
+
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git branch -m "main" </code></pre>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 8 -->
+        <div class="lesson-item" data-id="8" data-title="¿Qué es el archivo .gitignore?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    7
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Qué es el archivo .gitignore?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                El archivo <strong
+                    class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">.gitignore</strong>
+                sirve para indicarle a Git qué archivos o carpetas <strong
+                    class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">no
+                    queremos guardar</strong>. <br><br>
+
+                Para crear el archivo sigue estos pasos:
+            </p>
+
+            <!-- Pasos -->
+            <div class="space-y-6">
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">En Git Bash dentro de la carpeta de
+                            nuestro proyecto y escribimos:</h4>
+                    </div>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>touch .gitignore </code></pre>
+                        </div>
+                    </div>
+                    <br>
+                    Crea un archivo llamado .gitignore dentro de nuestro proyecto.
+
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Abrimos el archivo .gitignore</h4>
+                    </div>
+                    Dentro del archivo podemos indicar que archivo o carpeta queremos ignorar de la siguiente manera:
+                    <ul class="space-y-3">
+
+                        <li>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Archivo:
+                            </strong>
+                            Colocamos el nombre completo del archivo.
+                            <code class="text-emerald-300">contraseña.txt</code>
+                        </li>
+
+                        <li>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Carpeta:
+                            </strong>
+                            Colocamos el nombre de la carpeta seguido de /.
+                            <code class="text-emerald-300">privado/</code>
+                        </li>
+
+                        <li>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Varios archivos:
+                            </strong>
+                            Colocamos cada archivo en una línea diferente.
+                            <div class="bg-slate-900 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                contraseña.txt<br>
+                                datos.txt<br>
+                                prueba.txt
+                            </div>
+                        </li>
+
+                        <li>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Varios tipos de archivos:
+                            </strong>
+                            Utilizamos * para ignorar todos los archivos que tengan la misma extensión.
+                            <code class="text-emerald-300">*.log</code>
+                        </li>
+
+                        <li>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Archivos y carpetas:
+                            </strong>
+                            Podemos combinar diferentes elementos.
+                            <div class="bg-slate-900 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                contraseña.txt<br>
+                                privado/<br>
+                                node_modules/<br>
+                                *.log
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </div>
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">
+                            Paso 3
+                        </span>
+
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            Podemos generar un .gitignore automáticamente
+                        </h4>
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        Podemos utilizar una página que nos ayuda a generar el contenido del archivo
+                        <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                            .gitignore
+                        </strong>
+                        según la tecnología que utilizamos.
+                    </p>
+
+                    <!-- URL -->
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>https://www.toptal.com/developers/gitignore</code></pre>
+                        </div>
+
+                        <button onclick="copyCode(this)" data-code="https://www.toptal.com/developers/gitignore"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar enlace">
+
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+
+                            </svg>
+
+                        </button>
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        Escribimos la tecnología que estamos utilizando,
+                        y presionamos <strong class="text-emerald-300">Create</strong>.
+                    </p>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        La página generará el contenido que podemos copiar y pegar dentro de nuestro archivo
+                        <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                            .gitignore
+                        </strong>.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 9 -->
+        <div class="lesson-item" data-id="9" data-title="¿Qué es el archivo README.md?">
+
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">
+                    9
+                </span>
+
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">
+                    ¿Qué es el archivo README.md?
+                </h3>
+
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+
+                El archivo
+                <strong class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                    README.md
+                </strong>
+                sirve para
+                <strong class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                    explicar de qué trata nuestro proyecto
+                </strong>.
+
+                <br><br>
+
+                Podemos colocar información como el nombre del proyecto, una descripción,
+                cómo utilizarlo y otros datos importantes.
+
+                <br><br>
+
+                Para crear y utilizar el archivo sigue estos pasos:
+
+            </p>
+
+            <!-- Pasos -->
+            <div class="space-y-6">
+
+                <!-- Paso 1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+
+                    <div class="flex items-center space-x-3">
+
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">
+                            Paso 1
+                        </span>
+
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            Creamos el archivo README.md
+                        </h4>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        En Git Bash, dentro de la carpeta de nuestro proyecto, escribimos:
+                    </p>
+
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>touch README.md</code></pre>
+
+                        </div>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        Este comando crea un archivo llamado
+                        <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                            README.md
+                        </strong>
+                        dentro de nuestro proyecto.
+                    </p>
+
+                </div>
+
+
+                <!-- Paso 2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+
+                    <div class="flex items-center space-x-3">
+
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">
+                            Paso 2
+                        </span>
+
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            Abrimos el archivo README.md
+                        </h4>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        Dentro del archivo podemos escribir información sobre nuestro proyecto.
+                    </p>
+
+                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-3">
+
+                        <p>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Nombre del proyecto:
+                            </strong>
+                            Indica su nombre.
+                        </p>
+
+                        <p>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Descripción:
+                            </strong>
+                            Explica de qué trata.
+                        </p>
+
+                        <p>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Uso:
+                            </strong>
+                            Cómo utilizar el proyecto.
+                        </p>
+
+                        <p>
+                            <strong
+                                class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                                Autor:
+                            </strong>
+                            Quién creó el proyecto.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Paso 3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+
+                    <div class="flex items-center space-x-3">
+
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">
+                            Paso 3
+                        </span>
+
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            Conocemos algunas formas de escribir dentro de README.md
+                        </h4>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        El archivo README.md utiliza una forma sencilla de escribir llamada
+                        <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">
+                            Markdown
+                        </strong>.
+                    </p>
+
+                    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-4">
+
+                        <div>
+                            <strong class="text-cyan-300">Título:</strong>
+
+                            <div class="bg-slate-950 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                # Mi proyecto
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong class="text-cyan-300">Subtítulo:</strong>
+
+                            <div class="bg-slate-950 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                ## Descripción
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong class="text-cyan-300">Texto en negrita:</strong>
+
+                            <div class="bg-slate-950 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                **Texto importante**
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong class="text-cyan-300">Lista:</strong>
+
+                            <div class="bg-slate-950 rounded-lg p-3 mt-2 font-mono text-emerald-300">
+                                - HTML<br>
+                                - CSS<br>
+                                - JavaScript
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Paso 4 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+
+                    <div class="flex items-center space-x-3">
+
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">
+                            Paso 4
+                        </span>
+
+                        <h4 class="text-lg font-bold text-white leading-tight">
+                            Podemos crear nuestro README.md con una página
+                        </h4>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        También podemos utilizar una página que nos ayuda a crear nuestro
+                        archivo README.md de forma más sencilla.
+                    </p>
+
+                    <!-- URL -->
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>https://readme.so/</code></pre>
+
+                        </div>
+
+                        <button onclick="copyCode(this)" data-code="https://readme.so/"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar enlace">
+
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                    <p class="text-slate-200 leading-relaxed">
+                        Ingresamos a la página y podemos ir agregando las secciones que necesitamos
+                        para nuestro README.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- Unidad 1 -->
+        <div class="lesson-item" data-id="unidad-1" data-title="Unidad 1: ¿Cómo instalar Git en Windows?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">Unidad
+                    1</span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo instalar Git en Windows?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Para trabajar con repositorios en sistemas Windows, instalaremos el paquete oficial de <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">Git for
+                    Windows</strong>, el cual incluye <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">Git
+                    Bash</strong>, una terminal de comandos robusta y compatible con estándares Unix.
+            </p>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=900&auto=format&fit=crop&q=80"
+                    alt="Instalacion de Git en Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=Git+Windows+Setup'">
+            </div>
+
+            <!-- Subpasos detallados dentro de la unidad -->
+            <div class="space-y-6">
+                <!-- Paso 1.1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Descargar el instalador oficial</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Dirígete al sitio web oficial y descarga la última
+                        versión estable del <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">instalador</strong>
+                        para la arquitectura de tu equipo Windows (64-bit).</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>https://git-scm.com/download/win</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="https://git-scm.com/download/win"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar enlace">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 1.2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Ejecutar el instalador con opciones
+                            recomendadas</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Abre el archivo descargado. Puedes mantener las
+                        opciones predeterminadas recomendadas por el asistente (Next, Next...) asegurando que permita
+                        usar Git desde <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">Git
+                            Bash</strong>.</p>
+                </div>
+
+                <!-- Paso 1.3 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            3</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Verificar instalación en Git Bash</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Abre la aplicación <b>Git Bash</b> en tu PC con
+                        Windows y comprueba que esté lista para usar ejecutando el comando de <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">verificación</strong>:
+                    </p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git --version</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="git --version"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unidad 2 -->
+        <div class="lesson-item" data-id="unidad-2" data-title="Unidad 2: ¿Cómo configurar tu identidad en Windows?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">Unidad
+                    2</span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo configurar tu identidad?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Una vez instalado Git en Windows, personaliza tu perfil <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">global</strong>
+                para que cada <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">commit</strong>
+                registre tu nombre y correo personal de manera oficial.
+            </p>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=900&auto=format&fit=crop&q=80"
+                    alt="Configuracion de Identidad Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=Git+Config+Windows'">
+            </div>
+
+            <div class="space-y-6">
+                <!-- Paso 2.1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Configurar nombre de usuario</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Escribe el siguiente comando en tu terminal Git Bash
+                        estableciendo tu <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">nombre
+                            de usuario</strong> oficial:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.name "Tu Nombre Completo"</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)"
+                            data-code="git config --global user.name &quot;Tu Nombre Completo&quot;"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 2.2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Configurar correo electrónico</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Vincula tu cuenta de <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">correo
+                            electrónico</strong> asociada a GitHub o GitLab mediante el comando de configuración:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git config --global user.email "tu.correo@ejemplo.com"</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)"
+                            data-code="git config --global user.email &quot;tu.correo@ejemplo.com&quot;"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unidad 3 -->
+        <div class="lesson-item" data-id="unidad-3" data-title="Unidad 3: ¿Cómo iniciar un repositorio en Windows?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">Unidad
+                    3</span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo iniciar un repositorio?
+                </h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Crea directorios de trabajo en tus unidades de disco de Windows (como `C:` o `D:`) y dota de <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">control de
+                    versiones</strong> a tus proyectos usando la terminal.
+            </p>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=900&auto=format&fit=crop&q=80"
+                    alt="Git Init Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=Git+Init+Windows'">
+            </div>
+
+            <div class="space-y-6">
+                <!-- Paso 3.1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Crear y acceder a la carpeta del proyecto
+                        </h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Abre Git Bash y crea una nueva <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">carpeta</strong>
+                        para almacenar los archivos de tu aplicación web:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>mkdir mi-proyecto-web
+cd mi-proyecto-web</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="mkdir mi-proyecto-web&#10;cd mi-proyecto-web"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 3.2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Inicializar el repositorio local</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Activa el motor interno de Git ejecutando el comando
+                        de <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">inicialización</strong>:
+                    </p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git init
+git status</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="git init&#10;git status"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unidad 4 -->
+        <div class="lesson-item" data-id="unidad-4" data-title="Unidad 4: ¿Cómo guardar tus cambios (Commits)?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">Unidad
+                    4</span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo guardar tus cambios?</h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Consolida tus modificaciones registrándolas en el historial mediante la <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">zona de
+                    preparación</strong> (staging area) y los <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">commits</strong>
+                descriptivos.
+            </p>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?w=900&auto=format&fit=crop&q=80"
+                    alt="Git Commit Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=Git+Add+Commit'">
+            </div>
+
+            <div class="space-y-6">
+                <!-- Paso 4.1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Preparar archivos con Git Add</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Añade todos los archivos nuevos o editados al <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">staging
+                            area</strong> para incluirlos en el próximo empaquetado:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git add .</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="git add ."
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 4.2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Guardar con un mensaje descriptivo</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Confirma el guardado permanente generando un <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">commit</strong>
+                        con un mensaje claro:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git commit -m "feat: estructura inicial del proyecto en windows"</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)"
+                            data-code="git commit -m &quot;feat: estructura inicial del proyecto en windows&quot;"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unidad 5 -->
+        <div class="lesson-item" data-id="unidad-5" data-title="Unidad 5: ¿Cómo subir tu código a GitHub?">
+            <div
+                class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 p-4 rounded-2xl shadow-md mb-4 flex items-center space-x-3.5">
+                <span
+                    class="bg-blue-600 text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow shrink-0 whitespace-nowrap">Unidad
+                    5</span>
+                <h3 class="text-xl sm:text-2xl font-black text-cyan-300 leading-tight">¿Cómo subir a GitHub?</h3>
+            </div>
+
+            <p class="text-xl text-slate-200 leading-relaxed hyphens-auto text-justify mb-5">
+                Conecta tu repositorio local con una plataforma en la nube como <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">GitHub</strong>
+                para respaldar y compartir tu código con otros desarrolladores mediante un <strong
+                    class="text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/50">repositorio
+                    remoto</strong>.
+            </p>
+
+            <div class="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950 mb-6">
+                <img src="https://images.unsplash.com/photo-1607799279861-4dd421887fb3?w=900&auto=format&fit=crop&q=80"
+                    alt="GitHub Push Windows" class="w-full h-52 object-cover"
+                    onerror="this.src='https://placehold.co/600x300/1e293b/ffffff?text=Git+Remote+Push'">
+            </div>
+
+            <div class="space-y-6">
+                <!-- Paso 5.1 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            1</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Vincular con el servidor remoto</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Conecta tu repositorio local con la URL del <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">origen
+                            remoto</strong> creado en GitHub:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git remote add origin https://github.com/usuario/mi-proyecto-web.git</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)"
+                            data-code="git remote add origin https://github.com/usuario/mi-proyecto-web.git"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 5.2 -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-3">
+                        <span
+                            class="bg-indigo-600 text-white font-extrabold text-sm px-3.5 py-1.5 rounded-lg shadow shrink-0 whitespace-nowrap">Paso
+                            2</span>
+                        <h4 class="text-lg font-bold text-white leading-tight">Enviar avances con Push</h4>
+                    </div>
+                    <p class="text-xl text-slate-300 hyphens-auto">Sube tu rama principal hacia GitHub ejecutando una
+                        instrucción <strong
+                            class="text-indigo-300 bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-800/50">push</strong>
+                        definitiva:</p>
+                    <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 relative group shadow-inner">
+                        <div class="overflow-x-auto thick-horizontal-scroll pb-2">
+                            <pre
+                                class="text-lg text-cyan-400 font-mono whitespace-nowrap"><code>git push -u origin main</code></pre>
+                        </div>
+                        <button onclick="copyCode(this)" data-code="git push -u origin main"
+                            class="absolute right-2 top-2 bg-slate-800 hover:bg-slate-700 active:scale-90 text-slate-200 p-2.5 rounded-lg transition border border-slate-700 flex items-center justify-center shadow-md"
+                            title="Copiar código">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast"
+        class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-base font-bold px-7 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 opacity-0 pointer-events-none transition-all duration-300 z-50">
+        <svg class="w-6 h-6 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span id="toast-msg">¡Código copiado al portapapeles con éxito!</span>
+    </div>
+
+    <script>
+        // Función para alternar el menú lateral hamburguesa
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            const isOpen = sidebar.classList.contains('translate-x-0');
+
+            if (isOpen) {
+                sidebar.classList.remove('translate-x-0');
+                sidebar.classList.add('-translate-x-full');
+                backdrop.style.opacity = '0';
+                backdrop.style.pointerEvents = 'none';
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                backdrop.style.opacity = '1';
+                backdrop.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Generar dinámicamente todo el contenido y el menú lateral en base a los metadatos HTML
+        window.onload = function () {
+            const metadataContainer = document.getElementById('course-metadata');
+            const lessonItems = metadataContainer.querySelectorAll('.lesson-item');
+
+            const lessonsContainer = document.getElementById('lessons-container');
+            const sidebarNavList = document.getElementById('sidebar-nav-list');
+
+            lessonsContainer.innerHTML = '';
+            sidebarNavList.innerHTML = '';
+
+            lessonItems.forEach((item, index) => {
+                const id = item.getAttribute('data-id');
+                const title = item.getAttribute('data-title');
+
+                // 1. Inyectar la tarjeta de unidad en el flujo vertical principal
+                const lessonCard = document.createElement('section');
+                lessonCard.id = id;
+                lessonCard.className = 'lesson-scroll bg-slate-900/90 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl backdrop-blur';
+                lessonCard.innerHTML = item.innerHTML;
+                lessonsContainer.appendChild(lessonCard);
+
+                // 2. Generar el botón de navegación interactivo en el menú lateral
+                const navButton = document.createElement('button');
+                navButton.className = 'w-full text-left px-4 py-4 rounded-2xl text-base font-semibold text-slate-200 hover:text-white hover:bg-slate-800 transition flex items-center space-x-3.5 border border-transparent hover:border-slate-700 shadow-sm';
+                navButton.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl bg-slate-800 text-blue-400 flex items-center justify-center text-sm font-extrabold shrink-0">${index + 1}</span>
+                    <span class="truncate">${title}</span>
+                `;
+                navButton.onclick = function () {
+                    const targetElement = document.getElementById(id);
+
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+
+                        toggleSidebar();
+                    }
+                };
+                sidebarNavList.appendChild(navButton);
+            });
+        };
+
+        // Copiar fragmentos de código al portapapeles de manera segura
+        function copyCode(btn) {
+            const codeText = btn.getAttribute('data-code');
+
+            const textarea = document.createElement('textarea');
+            textarea.value = codeText;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("¡Copiado al portapapeles!");
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = `<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                } else {
+                    showToast("No se pudo copiar el texto.");
+                }
+            } catch (err) {
+                showToast("Error al intentar copiar.");
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        // Mostrar notificación toast flotante
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.innerText = message;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, -10px)';
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 0)';
+            }, 2500);
+        }
+    </script>
+</body>
+
+</html>
