@@ -11,6 +11,7 @@
         body { font-family: 'Inter', sans-serif; background: #090d16; color: #f8fafc; margin: 0; min-height: 100vh; }
         .card-hover { transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
         .card-hover:hover { transform: translateY(-3px); border-color: #38bdf8; box-shadow: 0 20px 35px rgba(8, 47, 73, .30); }
+        #access-key:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, .18); }
         @media screen and (orientation: landscape) and (max-height: 650px) { #rotate-warning { display: flex !important; } }
     </style>
 </head>
@@ -21,6 +22,24 @@
         <h2 class="text-3xl font-extrabold text-white">Gira tu celular a vertical</h2>
         <p class="text-slate-300 text-lg mt-3 max-w-sm">El taller está diseñado para leerse cómodamente en formato vertical.</p>
     </div>
+
+    <!-- PANTALLA DE ACCESO -->
+    <section id="access-screen" class="min-h-screen flex items-center justify-center p-5 bg-[radial-gradient(circle_at_top_right,_#172554,_#090d16_48%)]">
+        <div class="w-full max-w-md rounded-3xl border border-slate-700 bg-slate-900/90 shadow-2xl p-7 sm:p-9 text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-950/50">&lt;/&gt;</div>
+            <p class="mt-6 text-blue-400 text-sm font-extrabold tracking-wider">TALLER DE GIT</p>
+            <h1 class="text-3xl font-black text-white mt-2">Acceso al taller</h1>
+            <p class="text-slate-300 leading-relaxed mt-3">Coloca la clave para ver las clases disponibles.</p>
+            <form id="access-form" class="mt-6" onsubmit="validateAccess(event)">
+                <label for="access-key" class="sr-only">Clave de acceso</label>
+                <input id="access-key" type="password" inputmode="text" autocomplete="current-password" placeholder="Coloca la clave" class="w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3.5 text-center text-lg tracking-widest text-white placeholder:tracking-normal placeholder:text-slate-500 transition" required>
+                <p id="access-error" class="hidden mt-3 text-sm font-bold text-red-300">La clave no es correcta. Intenta nuevamente.</p>
+                <button type="submit" class="w-full mt-5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 transition px-5 py-3.5 font-extrabold text-white shadow-lg shadow-blue-950/50">Ingresar al taller</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="site-content" class="hidden">
 
     <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-4 shadow-xl">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
@@ -102,5 +121,32 @@
     </main>
 
     <footer class="border-t border-slate-800 mt-6 py-7 text-center text-sm text-slate-500">Taller de Git · Selecciona una clase para comenzar.</footer>
+    </div>
+
+    <script>
+        // CAMBIA SOLAMENTE EL TEXTO ENTRE COMILLAS PARA USAR OTRA CLAVE.
+        const CLAVE_DEL_TALLER = '111';
+
+        function validateAccess(event) {
+            event.preventDefault();
+            const input = document.getElementById('access-key');
+            const error = document.getElementById('access-error');
+
+            if (input.value === CLAVE_DEL_TALLER) {
+                document.getElementById('access-screen').classList.add('hidden');
+                document.getElementById('site-content').classList.remove('hidden');
+                sessionStorage.setItem('tallerGitAcceso', 'permitido');
+            } else {
+                error.classList.remove('hidden');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        if (sessionStorage.getItem('tallerGitAcceso') === 'permitido') {
+            document.getElementById('access-screen').classList.add('hidden');
+            document.getElementById('site-content').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
